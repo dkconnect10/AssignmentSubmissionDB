@@ -2,6 +2,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import  {Assignment} from '../models/assignment.model.js'
 
 const generateAccessAndRefereshTokens = async (userId) => {
   try {
@@ -116,9 +118,52 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
-const uploadAssignment = asyncHandler(async()=>{
+const uploadAssignment = asyncHandler(async (req,res) => {
+  const { userId, task, admin } = req.body;
 
-  
-})
+  const  file  = req.file;
 
-export { registerUser, loginUser,uploadAssignment };
+  if (!file) {
+    throw new ApiError(400, "file is required  ");
+  }
+
+  const fileLocalPath = file.path
+
+  const fileUploadonCloudinary = await uploadOnCloudinary(fileLocalPath);
+
+  if (!fileUploadonCloudinary) {
+    throw new ApiError(500, "file not uploaded on cloudinary ");
+  }
+
+  const assignment = await new Assignment({
+    userId,
+    task,
+    admin,
+    file: fileUploadonCloudinary.url || "",
+  }).save();
+
+  if (!assignment) {
+    throw new ApiError(
+      500,
+      "something went wrong while crateing new Assignment"
+    );
+  }
+
+  return res
+    .status(201)
+    .json(new ApiResponse(201, assignment, "Assignement upload successfully"));
+});
+
+export { registerUser, loginUser, uploadAssignment };
+
+// Upload an assignment
+// exports.uploadAssignment = async (req, res) => {
+//   try {
+//       const { userId, task, admin } = req.body;
+//       const newAssignment = new Assignment({ userId, task, admin });
+//       await newAssignment.save();
+//       res.status(201).json({ message: 'Assignment uploaded successfully!' });
+//   } catch (error) {
+//       res.status(400).json({ error: 'Failed to upload assignment. Please try again.' });
+//   }
+// };
