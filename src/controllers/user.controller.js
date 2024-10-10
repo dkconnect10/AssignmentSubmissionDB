@@ -156,14 +156,3 @@ const uploadAssignment = asyncHandler(async (req,res) => {
 
 export { registerUser, loginUser, uploadAssignment };
 
-// Upload an assignment
-// exports.uploadAssignment = async (req, res) => {
-//   try {
-//       const { userId, task, admin } = req.body;
-//       const newAssignment = new Assignment({ userId, task, admin });
-//       await newAssignment.save();
-//       res.status(201).json({ message: 'Assignment uploaded successfully!' });
-//   } catch (error) {
-//       res.status(400).json({ error: 'Failed to upload assignment. Please try again.' });
-//   }
-// };
