@@ -116,4 +116,9 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
-export { registerUser, loginUser };
+const uploadAssignment = asyncHandler(async()=>{
+
+  
+})
+
+export { registerUser, loginUser,uploadAssignment };
