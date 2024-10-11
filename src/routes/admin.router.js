@@ -1,22 +1,23 @@
 import express from "express";
+import { checkAdminRole } from "../middlewares/rollCheck.middleware.js";
 import {
   registerAdmin,
   loginAdmin,
   getAdminAssignments,
   acceptAssignment,
   rejectAssignment,
-} from "../controllers/adminController.js";
+} from "../controllers/admin.controller.js"
 
 const router = express.Router();
 
-router.post("/register", registerAdmin);
+router.route("/register").post(registerAdmin);
 
-router.post("/login", loginAdmin);
+router.route("/login").post(loginAdmin);
 
-router.get("/assignments", getAdminAssignments);
+router.route("/assignments").get(checkAdminRole, getAdminAssignments);
 
-router.post("/assignments/:id/accept",acceptAssignment);
+router.route("/assignments/:id/accept").post(checkAdminRole, acceptAssignment);
 
-router.post("/assignments/:id/reject",rejectAssignment);
+router.route("/assignments/:id/reject").post(checkAdminRole, rejectAssignment);
 
 export default router;

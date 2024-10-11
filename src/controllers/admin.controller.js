@@ -1,16 +1,16 @@
-import Admin from "../models/admin.model.js";
+import {Admin} from "../models/admin.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 import { Assignment } from "../models/assignment.model.js";
-import bcrypt from "bcrypt";
+
 
 const registerAdmin = asyncHandler(async (req, res) => {
   const { email, password, name } = req.body;
 
-  if ([email, password, name].some((fields) => fields.trim() === "")) {
+  if ([email, password, name].some((fields) => fields?.trim() === "")) {
     throw new ApiError(400, "All fildes are required");
   }
 
@@ -21,9 +21,9 @@ const registerAdmin = asyncHandler(async (req, res) => {
   }
 
   const admin = await Admin.create({
-    name,
-    email,
-    password,
+    name :req.body.name,
+    email:req.body.email,
+    password:req.body.password,
   });
 
   const createdAdmin = await Admin.findById(admin._id).select("-password");
@@ -50,7 +50,7 @@ const loginAdmin = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Admin does not exist");
   }
 
-  const isPasswordValid = await Admin.isPasswordCorrect(password);
+  const isPasswordValid = await admin.isPasswordCorrect(password);
 
   if (!isPasswordValid) {
     throw new ApiError(404, "invalid password please give crreact password");

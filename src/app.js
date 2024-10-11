@@ -22,7 +22,7 @@ import adminRouter from './routes/admin.router.js'
 //routes declaration
 
 app.use("/api/v2/users", userRouter)
-app.use('/api/v2/users',adminRouter)
+app.use('/api/v2/admins',adminRouter)
 
 
 
