@@ -8,16 +8,21 @@ import {
   rejectAssignment,
 } from "../controllers/admin.controller.js"
 
+import {verifyJWT}  from '../middlewares/auth.Admin.middleware.js'
+
 const router = express.Router();
 
 router.route("/register").post(registerAdmin);
 
 router.route("/login").post(loginAdmin);
 
-router.route("/assignments").get(checkAdminRole, getAdminAssignments);
+router.route("/assignments").get(verifyJWT,checkAdminRole, getAdminAssignments);
 
-router.route("/assignments/:id/accept").post(checkAdminRole, acceptAssignment);
+// router.get('/api/v2/admins/assignments/:userId', verifyJWT, checkAdminRole, getAdminAssignments);
 
-router.route("/assignments/:id/reject").post(checkAdminRole, rejectAssignment);
+
+router.route("/assignments/:id/accept").post(verifyJWT,checkAdminRole, acceptAssignment);
+
+router.route("/assignments/:id/reject").post(verifyJWT , checkAdminRole, rejectAssignment);
 
 export default router;

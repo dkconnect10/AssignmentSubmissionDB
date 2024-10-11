@@ -1,4 +1,4 @@
-import {Admin} from "../models/admin.model.js";
+import { Admin } from "../models/admin.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
@@ -6,6 +6,23 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 
 import { Assignment } from "../models/assignment.model.js";
 
+const generateacccessTokenAndrefreshToken = async (adminId) => {
+  try {
+    const admin = await Admin.findById(req.body.adminId);
+    const accessToken = admin.generateAccessToken();
+    const refreshToken = admin.generateRefreshToken();
+
+    admin.refreshToken = refreshToken;
+    await admin.save({ validateBeforeSave: false });
+
+    return { accessToken, refreshToken };
+  } catch (error) {
+    throw new ApiError(
+      500,
+      "something went wrong while generateacccessTokenAndrefreshToken"
+    );
+  }
+};
 
 const registerAdmin = asyncHandler(async (req, res) => {
   const { email, password, name } = req.body;
@@ -21,9 +38,9 @@ const registerAdmin = asyncHandler(async (req, res) => {
   }
 
   const admin = await Admin.create({
-    name :req.body.name,
-    email:req.body.email,
-    password:req.body.password,
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
   });
 
   const createdAdmin = await Admin.findById(admin._id).select("-password");
@@ -55,24 +72,49 @@ const loginAdmin = asyncHandler(async (req, res) => {
   if (!isPasswordValid) {
     throw new ApiError(404, "invalid password please give crreact password");
   }
+  const { accessToken, refreshToken } = generateacccessTokenAndrefreshToken(
+    admin._id
+  );
 
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
   const loggedAdmin = await Admin.findById(admin._id).select("-password");
 
   return res
     .status(200)
-    .json(new ApiResponse(200, loggedAdmin, "User logged in successfully"));
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        { admin: loggedAdmin, accessToken, refreshToken },
+        "User logged in successfully"
+      )
+    );
 });
 
 const getAdminAssignments = asyncHandler(async (req, res) => {
-  const assignments = await Assignment.find({ admin: req.user._id });
+  const { userId } = req.params;
 
-  if (!assignments) {
-    throw new ApiError(400, "assignment not found");
+  if (!userId) {
+    throw new ApiError(400, "User ID is required");
   }
-  return res
-    .status(200)
-    .json(200, assignments, "Assignments find successfully ");
+
+  const assignments = await Assignment.find({ user: userId });
+
+  if (!assignments || assignments.length === 0) {
+    throw new ApiError(404, "Assignments not found for the specified user");
+  }
+
+  return res.status(200).json({
+    status: 200,
+    data: assignments,
+    message: "Assignments retrieved successfully",
+  });
 });
+
 
 const acceptAssignment = asyncHandler(async (req, res) => {
   const assignment = await Assignment.findByIdAndUpdate(
@@ -104,4 +146,10 @@ const rejectAssignment = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, assignment, "Assignment rejected"));
 });
-export { registerAdmin, loginAdmin, getAdminAssignments, acceptAssignment,rejectAssignment };
+export {
+  registerAdmin,
+  loginAdmin,
+  getAdminAssignments,
+  acceptAssignment,
+  rejectAssignment,
+};
