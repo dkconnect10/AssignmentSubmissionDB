@@ -8,7 +8,7 @@ import { Assignment } from "../models/assignment.model.js";
 
 const generateacccessTokenAndrefreshToken = async (adminId) => {
   try {
-    const admin = await Admin.findById(req.body.adminId);
+    const admin = await Admin.findById(adminId);
     const accessToken = admin.generateAccessToken();
     const refreshToken = admin.generateRefreshToken();
 
@@ -96,7 +96,7 @@ const loginAdmin = asyncHandler(async (req, res) => {
 });
 
 const getAdminAssignments = asyncHandler(async (req, res) => {
-  const { userId } = req.params;
+  const { userId } = req.params
 
   if (!userId) {
     throw new ApiError(400, "User ID is required");
@@ -114,7 +114,6 @@ const getAdminAssignments = asyncHandler(async (req, res) => {
     message: "Assignments retrieved successfully",
   });
 });
-
 
 const acceptAssignment = asyncHandler(async (req, res) => {
   const assignment = await Assignment.findByIdAndUpdate(

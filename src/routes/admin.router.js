@@ -16,10 +16,7 @@ router.route("/register").post(registerAdmin);
 
 router.route("/login").post(loginAdmin);
 
-router.route("/assignments").get(verifyJWT,checkAdminRole, getAdminAssignments);
-
-// router.get('/api/v2/admins/assignments/:userId', verifyJWT, checkAdminRole, getAdminAssignments);
-
+router.route("/assignments/:userId").get( getAdminAssignments);
 
 router.route("/assignments/:id/accept").post(verifyJWT,checkAdminRole, acceptAssignment);
 
